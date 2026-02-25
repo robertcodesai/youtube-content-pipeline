@@ -1,0 +1,10 @@
+{
+  "name": "youtube-content-pipeline",
+  "version": "1.0.0",
+  "description": "Content pipeline for Robert's Tech Talk YouTube channel",
+  "scripts": {
+    "validate": "node scripts/validate-tracker.js"
+  },
+  "author": "robertcodesai",
+  "license": "MIT"
+}

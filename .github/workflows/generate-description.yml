@@ -1,0 +1,71 @@
+name: Generate Video Description
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Find new/modified scripts
+        id: changed
+        run: |
+          FILES=$(git diff --name-only HEAD~1 HEAD -- 'scripts/*.md' | tr '\n' ' ')
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          echo "Changed scripts: $FILES"
+
+      - name: Generate descriptions
+        if: steps.changed.outputs.files != ''
+        run: |
+          mkdir -p published/descriptions
+          for script in ${{ steps.changed.outputs.files }}; do
+            slug=$(basename "$script" .md)
+            echo "Generating description for: $slug"
+            
+            # Extract title (first H1)
+            TITLE=$(head -1 "$script" | sed 's/^# //')
+            
+            # Extract keywords if present
+            KEYWORDS=$(grep -A1 "Description Keywords" "$script" | tail -1 | sed 's/^- //' || echo "")
+            
+            # Build description
+            cat > "published/descriptions/${slug}.md" << EOF
+          # ${TITLE}
+
+          🔔 Subscribe for more tech content: https://youtube.com/@robertstechtalk
+
+          ## Timestamps
+          $(grep -E '## .+\([0-9]+:[0-9]+' "$script" | sed 's/## //' | sed 's/ (/ - /' | sed 's/)//' || echo "Coming soon...")
+
+          ## Links & Resources
+          <!-- Add relevant links here -->
+
+          ## Keywords
+          ${KEYWORDS}
+
+          ---
+          📧 Business inquiries: robert@robertstechtalk.com
+          🐦 Twitter: @robertcodesai
+          💻 GitHub: https://github.com/robertcodesai
+
+          #tech #coding #developer
+          EOF
+            
+            echo "✅ Generated: published/descriptions/${slug}.md"
+          done
+
+      - name: Commit descriptions
+        if: steps.changed.outputs.files != ''
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add published/descriptions/
+          git diff --staged --quiet || git commit -m "🤖 Auto-generate video descriptions"
+          git push

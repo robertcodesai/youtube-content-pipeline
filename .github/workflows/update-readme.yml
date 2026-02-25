@@ -1,0 +1,46 @@
+name: Update README Stats
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'TRACKER.md'
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Calculate stats
+        id: stats
+        run: |
+          IDEAS=$(grep -c "💡" TRACKER.md 2>/dev/null || echo "0")
+          IN_PROGRESS=$(grep -cE "📝|🎨|🎬|✂️" TRACKER.md 2>/dev/null || echo "0")
+          PUBLISHED=$(grep -c "✅" TRACKER.md 2>/dev/null || echo "0")
+          TOTAL=$((IDEAS + IN_PROGRESS + PUBLISHED))
+          
+          echo "ideas=$IDEAS" >> $GITHUB_OUTPUT
+          echo "in_progress=$IN_PROGRESS" >> $GITHUB_OUTPUT
+          echo "published=$PUBLISHED" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+
+      - name: Update README
+        run: |
+          STATS="| Metric | Count |\n|--------|-------|\n| 💡 Ideas | ${{ steps.stats.outputs.ideas }} |\n| 📝 In Progress | ${{ steps.stats.outputs.in_progress }} |\n| 🎬 Published | ${{ steps.stats.outputs.published }} |\n| 📅 Total Videos | ${{ steps.stats.outputs.total }} |"
+          
+          sed -i '/<!-- STATS:START -->/,/<!-- STATS:END -->/{
+            /<!-- STATS:START -->/{
+              p
+              r /dev/stdin
+            }
+            /<!-- STATS:END -->/!d
+          }' README.md <<< "$(echo -e "$STATS")"
+
+      - name: Commit changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add README.md
+          git diff --staged --quiet || git commit -m "📊 Update pipeline stats"
+          git push
