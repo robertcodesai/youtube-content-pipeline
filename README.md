@@ -44,4 +44,4 @@ npm run validate    # Validate TRACKER.md and lint markdown
 
 ---
 
-Made with ❤️ for [Robert's Tech Talk](https://youtube.com/@robertstechtalk)
+Made with ❤️ for [Robert's Tech Talk](https://youtube.com/@robertcodesai)

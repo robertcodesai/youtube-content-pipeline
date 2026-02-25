@@ -39,7 +39,7 @@ jobs:
             cat > "published/descriptions/${slug}.md" << EOF
           # ${TITLE}
 
-          🔔 Subscribe for more tech content: https://youtube.com/@robertstechtalk
+          🔔 Subscribe for more tech content: https://youtube.com/@robertcodesai
 
           ## Timestamps
           $(grep -E '## .+\([0-9]+:[0-9]+' "$script" | sed 's/## //' | sed 's/ (/ - /' | sed 's/)//' || echo "Coming soon...")
@@ -51,7 +51,7 @@ jobs:
           ${KEYWORDS}
 
           ---
-          📧 Business inquiries: robert@robertstechtalk.com
+          📧 Business inquiries: robert@robertcodesai.com
           🐦 Twitter: @robertcodesai
           💻 GitHub: https://github.com/robertcodesai
 
